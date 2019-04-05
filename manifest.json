@@ -6,9 +6,9 @@
         "en": "Soundcloud-like but simple, easy and KISS (and ActivityPub).",
         "fr": "Soundcloud-like mais simple, facile et KISS (et ActivityPub)."
     },
-    "version": "1.0~ynh1",
-    "url": "https://example.com",
-    "license": "free",
+    "version": "0.1~ynh1",
+    "url": "https://sound.otter.sh/user/dashie",
+    "license": "MIT",
     "maintainer": {
         "name": "yalh76"
     },
