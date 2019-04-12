@@ -294,10 +294,8 @@ systemctl reload nginx
 #=================================================
 ynh_print_info "Starting Reel2bits services..."
 
-ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd
-#--line_match="Listening on tcp"
-ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd
-#--line_match="Starting processing"
+ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # END OF SCRIPT
