@@ -1,7 +1,7 @@
 # Reel2Bits for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/.svg)](https://dash.yunohost.org/appci/app/reel2bits)  
-[![Install reel2bits with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=reel2bits)
+[![Install Reel2Bits with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=reel2bits)
 
 > *This package allow you to install Reel2Bits quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
