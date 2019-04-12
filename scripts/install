@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_systemd_action
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -14,7 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	### Remove this function if there's nothing to clean before calling the remove script.
+	read -p "key"
 	true
 }
 # Exit if an error occurs during the execution of the script
@@ -30,17 +31,9 @@ admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
 password=$YNH_APP_ARG_PASSWORD
+security_password_salt=$(ynh_string_random 30)
+secret_key=$(ynh_string_random 30)
 
-### If it's a multi-instance app, meaning it can be installed several times independently
-### The id of the app as stated in the manifest is available as $YNH_APP_ID
-### The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
-### The app instance name is available as $YNH_APP_INSTANCE_NAME
-###    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
-###    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
-###    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
-### The app instance name is probably what interests you most, since this is
-### guaranteed to be unique. This is a good unique identifier to define installation path,
-### db names, ...
 app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
@@ -48,8 +41,6 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 ynh_print_info "Validating installation parameters..."
 
-### If the app uses nginx as web server (written in HTML/PHP in most cases), the final path should be "/var/www/$app".
-### If the app provides an internal web server (or uses another application server such as uwsgi), the final path should be "/opt/yunohost/$app"
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 
@@ -66,6 +57,10 @@ ynh_app_setting_set $app path $path_url
 ynh_app_setting_set $app admin $admin
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app language $language
+ynh_app_setting_set $app security_password_salt $security_password_salt
+ynh_app_setting_set $app secret_key $secret_key
+
+ynh_app_setting_set $app final_path $final_path
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -74,60 +69,73 @@ ynh_app_setting_set $app language $language
 #=================================================
 ynh_print_info "Configuring firewall..."
 
-### Use these lines if you have to open a port for the application
-### `ynh_find_port` will find the first available port starting from the given port.
-### If you're not using these lines:
-###		- Remove the section "CLOSE A PORT" in the remove script
-
 # Find a free port
 port=$(ynh_find_port 8095)
-# Open this port
-ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set $app port $port
+
+#=================================================
+# INSTALL BUILD DEPENDENCIES
+#=================================================
+ynh_print_info "Installing build dependencies..."
+
+ynh_install_app_dependencies $build_dependencies
+
+#=================================================
+# BUILD AUDIOWAVEFORM
+#=================================================
+ynh_print_info "Building audiowaveform..."
+
+ynh_setup_source "$final_path/audiowaveform.d/audiowaveform" audiowaveform
+ynh_setup_source "$final_path/audiowaveform.d/googletest" googletest
+
+pushd "$final_path/audiowaveform.d/audiowaveform"
+    ln -s $final_path/audiowaveform.d/googletest/googletest googletest
+    ln -s $final_path/audiowaveform.d/googletest/googlemock googlemock
+    mkdir build
+    cd build
+    cmake ..
+    make 
+    cp $final_path/audiowaveform.d/audiowaveform/build/audiowaveform $final_path/.
+popd
+
+ynh_secure_remove "$final_path/audiowaveform.d/"
+
+#=================================================
+# REMOVE BUILD DEPENDENCIES
+#=================================================
+ynh_print_info "Removing build dependencies"
+
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 ynh_print_info "Installing dependencies..."
 
-### `ynh_install_app_dependencies` allows you to add any "apt" dependencies to the package.
-### Those deb packages will be installed as dependencies of this package.
-### If you're not using this helper:
-###		- Remove the section "REMOVE DEPENDENCIES" in the remove script
-###		- Remove the variable "pkg_dependencies" in _common.sh
-###		- As well as the section "REINSTALL DEPENDENCIES" in the restore script
-###		- And the section "UPGRADE DEPENDENCIES" in the upgrade script
-
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
-# CREATE A MYSQL DATABASE
+# CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Creating a MySQL database..."
-
-### Use these lines if you need a database for the application.
-### `ynh_mysql_setup_db` will create a database, an associated user and a ramdom password.
-### The password will be stored as 'mysqlpwd' into the app settings,
-### and will be available as $db_pwd
-### If you're not using these lines:
-###		- Remove the section "BACKUP THE MYSQL DATABASE" in the backup script
-###		- Remove also the section "REMOVE THE MYSQL DATABASE" in the remove script
-###		- As well as the section "RESTORE THE MYSQL DATABASE" in the restore script
+ynh_print_info "Creating a PostgreSQL database..."
 
 db_name=$(ynh_sanitize_dbid $app)
-ynh_app_setting_set $app db_name $db_name
-ynh_mysql_setup_db $db_name $db_name
+db_user=$db_name
+db_pwd=$(ynh_string_random 30)
+ynh_app_setting_set "$app" db_name "$db_name"
+ynh_app_setting_set "$app" db_pwd "$db_pwd"
+ynh_psql_test_if_first_run
+ynh_psql_create_user "$app" "$db_pwd"
+ynh_psql_execute_as_root "CREATE DATABASE $db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $db_user;"
+ynh_psql_execute_as_root "\connect $db_name 
+CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_print_info "Setting up source files..."
 
-### `ynh_setup_source` is used to install an app from a zip or tar.gz file,
-### downloaded from an upstream source, like a git repository.
-### `ynh_setup_source` use the file conf/app.src
-
-ynh_app_setting_set $app final_path $final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
 
@@ -139,7 +147,7 @@ ynh_print_info "Configuring nginx web server..."
 ### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
 # Create a dedicated nginx config
-ynh_add_nginx_config
+ynh_add_nginx_config app
 
 #=================================================
 # CREATE DEDICATED USER
@@ -150,99 +158,92 @@ ynh_print_info "Configuring system user..."
 ynh_system_user_create $app
 
 #=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-ynh_print_info "Configuring php-fpm..."
-
-### `ynh_add_fpm_config` is used to set up a PHP config.
-### You can remove it if your app doesn't use PHP.
-### `ynh_add_fpm_config` will use the files conf/php-fpm.conf and conf/php-fpm.ini
-### If you're not using these lines:
-###		- You can remove these files in conf/.
-###		- Remove the section "BACKUP THE PHP-FPM CONFIGURATION" in the backup script
-###		- Remove also the section "REMOVE PHP-FPM CONFIGURATION" in the remove script
-###		- As well as the section "RESTORE THE PHP-FPM CONFIGURATION" in the restore script
-###		With the reload at the end of the script.
-###		- And the section "PHP-FPM CONFIGURATION" in the upgrade script
-
-# Create a dedicated php-fpm config
-ynh_add_fpm_config
-
-#=================================================
 # SPECIFIC SETUP
 #=================================================
-# ...
+# CREATE THE DATA DIRECTORY
 #=================================================
+ynh_print_info "Create the data directory..."
+
+# Define app's data directory
+datadir="/home/yunohost.app/${app}"
+
+# Create app folders
+mkdir -p "$datadir"
+mkdir -p "$datadir/uploads/sounds"
+mkdir -p "$datadir/uploads/waveform"
+mkdir -p "$datadir/tmp"
+
+# Give permission to the datadir
+chown -R "$app":"$app" "$datadir"
+
+ynh_app_setting_set $app datadir $datadir
+
+#=================================================
+# MODIFY A CONFIG FILE
+#=================================================
+
+config="$final_path/config.py"
+cp ../conf/config.py.sample "$config"
+
+ynh_replace_string "__LANGUAGE__" "$language" "$config"
+ynh_replace_string "__APP__" "$app" "$config"
+ynh_replace_string "__DOMAIN__" "$domain" "$config"
+ynh_replace_string "__SECURITY_PASSWORD_SALT__" "$security_password_salt" "$config"
+ynh_replace_string "__SECRET_KEY__" "$secret_key" "$config"
+ynh_replace_string "__DB_USER__" "$db_user" "$config"
+ynh_replace_string "__DB_PWD__" "$db_pwd" "$config"
+ynh_replace_string "__DB_NAME__" "$db_name" "$config"
+ynh_replace_string "__FINAL_PATH__" "$final_path" "$config"
+
+#=================================================
+# INSTALL PYTHONZ TO GET PYTHON 3.6
+#=================================================
+
+# Get pythonz
+# curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
+# ./pythonz-install
+ynh_setup_source "$final_path/.pythonz" pythonz
+export PYTHONZ_ROOT="$final_path/.pythonz"
+# Then install it
+python $final_path/.pythonz/pythonz_install.py
+
+# Install Python 3.6.6
+$final_path/.pythonz/bin/pythonz install 3.7.3
+
+#=================================================
+# INSTALL REEL2BITS
+#=================================================
+
+pushd $final_path
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.3) ve3
+	ve3/bin/pip3 install --requirement requirements.txt
+	ve3/bin/python3 setup.py install
+	export FLASK_ENV=production
+	ve3/bin/flask db upgrade
+	ve3/bin/flask seed
+	#ve3/bin/flask run
+	ve3/bin/pip3 install waitress
+	#ve3/bin/flask users create --password TEXT -a IDENTITY
+	#ve3/bin/flask roles add yalh@yh.yalh.net admin
+popd
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
 ynh_print_info "Configuring a systemd service..."
 
-### `ynh_systemd_config` is used to configure a systemd script for an app.
-### It can be used for apps that use sysvinit (with adaptation) or systemd.
-### Have a look at the app to be sure this app needs a systemd script.
-### `ynh_systemd_config` will use the file conf/systemd.service
-### If you're not using these lines:
-###		- You can remove those files in conf/.
-###		- Remove the section "BACKUP SYSTEMD" in the backup script
-###		- Remove also the section "STOP AND REMOVE SERVICE" in the remove script
-###		- As well as the section "RESTORE SYSTEMD" in the restore script
-###		- And the section "SETUP SYSTEMD" in the upgrade script
+ynh_replace_string "__PORT__" "$port" "../conf/reel2bits-web.service"
 
 # Create a dedicated systemd config
-ynh_add_systemd_config
-
-#=================================================
-# SETUP APPLICATION WITH CURL
-#=================================================
-
-### Use these lines only if the app installation needs to be finalized through
-### web forms. We generally don't want to ask the final user,
-### so we're going to use curl to automatically fill the fields and submit the
-### forms.
-
-# Set right permissions for curl install
-chown -R $app: $final_path
-
-# Set the app as temporarily public for curl call
-ynh_print_info "Configuring SSOwat..."
-ynh_app_setting_set $app skipped_uris "/"
-# Reload SSOwat config
-yunohost app ssowatconf
-
-# Reload Nginx
-systemctl reload nginx
-
-# Installation with curl
-ynh_print_info "Finalizing installation..."
-ynh_local_curl "/INSTALL_PATH" "key1=value1" "key2=value2" "key3=value3"
-
-# Remove the public access
-if [ $is_public -eq 0 ]
-then
-	ynh_app_setting_delete $app skipped_uris
-fi
-
-#=================================================
-# MODIFY A CONFIG FILE
-#=================================================
-
-### `ynh_replace_string` is used to replace a string in a file.
-### (It's compatible with sed regular expressions syntax)
-
-ynh_replace_string "match_string" "replace_string" "$final_path/CONFIG_FILE"
+ynh_add_systemd_config "$app-web"       "reel2bits-web.service"
+ynh_add_systemd_config "$app-worker"       "reel2bits-worker.service"
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
 
-### `ynh_store_file_checksum` is used to store the checksum of a file.
-### That way, during the upgrade script, by using `ynh_backup_if_checksum_is_different`,
-### you can make a backup of this file before modifying it again if the admin had modified it.
-
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$final_path/CONFIG_FILE"
+ynh_store_file_checksum "$config"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -250,25 +251,13 @@ ynh_store_file_checksum "$final_path/CONFIG_FILE"
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-### For security reason, any app should set the permissions to root: before anything else.
-### Then, if write authorization is needed, any access should be given only to directories
-### that really need such authorization.
-
 # Set permissions to app files
-chown -R root: $final_path
+chown -R $app:root $final_path
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
 ynh_print_info "Configuring log rotation..."
-
-### `ynh_use_logrotate` is used to configure a logrotate configuration for the logs of this app.
-### Use this helper only if there is effectively a log file for this app.
-### If you're not using this helper:
-###		- Remove the section "BACKUP LOGROTATE" in the backup script
-###		- Remove also the section "REMOVE LOGROTATE CONFIGURATION" in the remove script
-###		- As well as the section "RESTORE THE LOGROTATE CONFIGURATION" in the restore script
-###		- And the section "SETUP LOGROTATE" in the upgrade script
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
@@ -277,17 +266,9 @@ ynh_use_logrotate
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-### `yunohost service add` is a CLI yunohost command to add a service in the admin panel.
-### You'll find the service in the 'services' section of YunoHost admin panel.
-### This CLI command would be useless if the app does not have any services (systemd or sysvinit)
-### If you're not using these lines:
-###		- You can remove these files in conf/.
-###		- Remove the section "REMOVE SERVICE FROM ADMIN PANEL" in the remove script
-###		- As well as the section "ADVERTISE SERVICE IN ADMIN PANEL" in the restore script
-
-yunohost service add $app --log "/var/log/$app/$app.log"
-# if using yunohost version 3.2 or more in the 'manifest.json', a description can be added
 #yunohost service add $app --description "$app daemon for XXX" --log "/var/log/$app/$app.log"
+yunohost service add "$app-web"
+yunohost service add "$app-worker"
 
 #=================================================
 # SETUP SSOWAT
@@ -307,6 +288,14 @@ fi
 ynh_print_info "Reloading nginx web server..."
 
 systemctl reload nginx
+
+#=================================================
+# START REEL2BITS SERVICES
+#=================================================
+ynh_print_info "Starting Reel2bits services..."
+
+ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # END OF SCRIPT
