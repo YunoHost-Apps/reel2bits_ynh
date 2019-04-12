@@ -15,8 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	#### Remove this function if there's nothing to clean before calling the remove script.
-	true
+	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -32,6 +31,9 @@ domain=$(ynh_app_setting_get $app domain)
 path_url=$(ynh_app_setting_get $app path)
 final_path=$(ynh_app_setting_get $app final_path)
 db_name=$(ynh_app_setting_get $app db_name)
+db_user=$db_name
+db_pwd=$(ynh_app_setting_get $app db_pwd)
+datadir=$(ynh_app_setting_get $app datadir)
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
@@ -71,13 +73,21 @@ ynh_system_user_create $app
 #=================================================
 
 # Restore permissions on app files
-chown -R root: $final_path
+chown -R $app:root $final_path
 
 #=================================================
-# RESTORE THE PHP-FPM CONFIGURATION
+# RECREATE THE DATA DIRECTORY
 #=================================================
+ynh_print_info "Recreate the data directory..."
 
-ynh_restore_file "/etc/php/7.0/fpm/pool.d/$app.conf"
+# Create app folders
+mkdir -p "$datadir"
+mkdir -p "$datadir/uploads/sounds"
+mkdir -p "$datadir/uploads/waveforms"
+mkdir -p "$datadir/tmp"
+
+# Give permission to the datadir
+chown -R "$app":"$app" "$datadir"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -90,49 +100,49 @@ ynh_print_info "Reinstalling dependencies..."
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
-# RESTORE THE MYSQL DATABASE
+# RESTORE THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Restoring the MySQL database..."
+ynh_print_info "Restoring the PostgreSQL database..."
 
-db_pwd=$(ynh_app_setting_get $app mysqlpwd)
-ynh_mysql_setup_db $db_name $db_name $db_pwd
-ynh_mysql_connect_as $db_name $db_pwd $db_name < ./db.sql
+ynh_psql_test_if_first_run
+ynh_psql_create_user "$app" "$db_pwd"
+ynh_psql_execute_as_root "CREATE DATABASE $db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $db_user;"
+ynh_psql_execute_as_root "\connect $db_name 
+CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 
 #=================================================
 # RESTORE SYSTEMD
 #=================================================
 ynh_print_info "Restoring the systemd configuration..."
 
-ynh_restore_file "/etc/systemd/system/$app.service"
-systemctl enable $app.service
+ynh_restore_file "/etc/systemd/system/$app-web.service"
+ynh_restore_file "/etc/systemd/system/$app-worker.service"
+systemctl enable $app-web.service
+systemctl enable $app-worker.service
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/$app/$app.log"
-
-#=================================================
-# RESTORE THE CRON FILE
-#=================================================
-
-ynh_restore_file "/etc/cron.d/$app"
-
-#=================================================
-# RESTORE THE LOGROTATE CONFIGURATION
-#=================================================
-
-ynh_restore_file "/etc/logrotate.d/$app"
+yunohost service add "$app-web"
+yunohost service add "$app-worker"
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# RELOAD NGINX AND PHP-FPM
+# RELOAD NGINX
 #=================================================
-ynh_print_info "Reloading nginx web server and php-fpm..."
+ynh_print_info "Reloading nginx web server"
 
-systemctl reload php7.0-fpm
 systemctl reload nginx
+
+#=================================================
+# START REEL2BITS SERVICES
+#=================================================
+ynh_print_info "Starting Reel2bits services..."
+
+ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # END OF SCRIPT
