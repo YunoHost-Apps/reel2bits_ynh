@@ -15,8 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	### Remove this function if there's nothing to clean before calling the remove script.
-	true
+	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -31,6 +30,14 @@ app=$YNH_APP_INSTANCE_NAME
 final_path=$(ynh_app_setting_get $app final_path)
 domain=$(ynh_app_setting_get $app domain)
 db_name=$(ynh_app_setting_get $app db_name)
+
+#=================================================
+# STOP REEL2BITS SERVICES
+#=================================================
+ynh_print_info "Stopping Reel2bits services..."
+
+ynh_systemd_action --action=stop --service_name=${app}-web --log_path=systemd --line_match="Stopped ${app}-web"
+ynh_systemd_action --action=stop --service_name=${app}-worker --log_path=systemd --line_match="Stopped ${app}-worker"
 
 #=================================================
 # STANDARD BACKUP STEPS
@@ -49,40 +56,29 @@ ynh_print_info "Backing up nginx web server configuration..."
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
-# BACKUP THE PHP-FPM CONFIGURATION
+# BACKUP THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Backing up php-fpm configuration..."
+ynh_print_info "Backing up the PostgreSQL database..."
 
-ynh_backup "/etc/php/7.0/fpm/pool.d/$app.conf"
-
-#=================================================
-# BACKUP THE MYSQL DATABASE
-#=================================================
-ynh_print_info "Backing up the MySQL database..."
-
-ynh_mysql_dump_db "$db_name" > db.sql
+ynh_psql_dump_db "$db_name" > db.sql
 
 #=================================================
 # SPECIFIC BACKUP
-#=================================================
-# BACKUP LOGROTATE
-#=================================================
-ynh_print_info "Backing up logrotate configuration..."
-
-ynh_backup "/etc/logrotate.d/$app"
-
 #=================================================
 # BACKUP SYSTEMD
 #=================================================
 ynh_print_info "Backing up systemd configuration..."
 
-ynh_backup "/etc/systemd/system/$app.service"
+ynh_backup "/etc/systemd/system/$app-web.service"
+ynh_backup "/etc/systemd/system/$app-worker.service"
 
 #=================================================
-# BACKUP A CRON FILE
+# START REEL2BITS SERVICES
 #=================================================
+ynh_print_info "Starting Reel2bits services..."
 
-ynh_backup "/etc/cron.d/$app"
+ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # END OF SCRIPT

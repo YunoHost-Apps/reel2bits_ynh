@@ -15,8 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	read -p "key"
-	true
+	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -170,7 +169,7 @@ datadir="/home/yunohost.app/${app}"
 # Create app folders
 mkdir -p "$datadir"
 mkdir -p "$datadir/uploads/sounds"
-mkdir -p "$datadir/uploads/waveform"
+mkdir -p "$datadir/uploads/waveforms"
 mkdir -p "$datadir/tmp"
 
 # Give permission to the datadir
@@ -253,14 +252,6 @@ ynh_store_file_checksum "$config"
 
 # Set permissions to app files
 chown -R $app:root $final_path
-
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_print_info "Configuring log rotation..."
-
-# Use logrotate to manage application logfile(s)
-ynh_use_logrotate
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
