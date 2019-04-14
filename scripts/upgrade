@@ -172,6 +172,8 @@ popd
 #=================================================
 ynh_print_info "Upgrading systemd configuration..."
 
+ynh_replace_string "__PORT__" "$port" "../conf/reel2bits-web.service"
+
 # Create a dedicated systemd config
 ynh_add_systemd_config "$app-web"       "reel2bits-web.service"
 ynh_add_systemd_config "$app-worker"       "reel2bits-worker.service"
