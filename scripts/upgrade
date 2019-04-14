@@ -160,8 +160,6 @@ pushd $final_path
 	ve3/bin/python3 setup.py install
 	export FLASK_ENV=production
 	ve3/bin/flask db upgrade
-	ve3/bin/flask seed
-	#ve3/bin/flask run
 	ve3/bin/pip3 install waitress
 	#ve3/bin/flask users create --password TEXT -a IDENTITY
 	#ve3/bin/flask roles add yalh@yh.yalh.net admin
