@@ -2,9 +2,9 @@
 BABEL_DEFAULT_LOCALE = "__LANGUAGE__"
 
 # Uploads dirs
-UPLOADED_SOUNDS_DEST = "/home/yunohost.app/__APP__/uploads/sounds"
-UPLOADS_DEFAULT_DEST = "/home/yunohost.app/__APP__/uploads"
-TEMP_DOWNLOAD_FOLDER = "/home/yunohost.app/__APP__/tmp"
+UPLOADED_SOUNDS_DEST = "__DATADIR__/uploads/sounds"
+UPLOADS_DEFAULT_DEST = "__DATADIR__/uploads"
+TEMP_DOWNLOAD_FOLDER = "__DATADIR__/tmp"
 
 # Where is located Audiowaveform ?
 AUDIOWAVEFORM_BIN = "__FINAL_PATH__/audiowaveform"

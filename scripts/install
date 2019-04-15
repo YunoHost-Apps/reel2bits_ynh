@@ -25,7 +25,7 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
+path_url="/"
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
@@ -146,7 +146,7 @@ ynh_print_info "Configuring nginx web server..."
 ### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
 # Create a dedicated nginx config
-ynh_add_nginx_config app
+ynh_add_nginx_config "app"
 
 #=================================================
 # CREATE DEDICATED USER
@@ -185,7 +185,7 @@ config="$final_path/config.py"
 cp ../conf/config.py.sample "$config"
 
 ynh_replace_string "__LANGUAGE__" "$language" "$config"
-ynh_replace_string "__APP__" "$app" "$config"
+ynh_replace_string "__DATADIR__" "$datadir" "$config"
 ynh_replace_string "__DOMAIN__" "$domain" "$config"
 ynh_replace_string "__SECURITY_PASSWORD_SALT__" "$security_password_salt" "$config"
 ynh_replace_string "__SECRET_KEY__" "$secret_key" "$config"
@@ -220,7 +220,6 @@ pushd $final_path
 	export FLASK_ENV=production
 	ve3/bin/flask db upgrade
 	ve3/bin/flask seed
-	#ve3/bin/flask run
 	ve3/bin/pip3 install waitress
 	#ve3/bin/flask users create --password TEXT -a IDENTITY
 	#ve3/bin/flask roles add yalh@yh.yalh.net admin

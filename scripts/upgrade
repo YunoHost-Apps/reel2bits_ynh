@@ -23,6 +23,12 @@ is_public=$(ynh_app_setting_get $app is_public)
 final_path=$(ynh_app_setting_get $app final_path)
 language=$(ynh_app_setting_get $app language)
 db_name=$(ynh_app_setting_get $app db_name)
+db_user=$db_name
+datadir=$(ynh_app_setting_get $app datadir)
+security_password_salt=$(ynh_app_setting_get $app security_password_salt)
+secret_key=$(ynh_app_setting_get $app secret_key)
+db_pwd=$(ynh_app_setting_get $app db_pwd)
+port=$(ynh_app_setting_get $app port)
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
@@ -58,6 +64,7 @@ ynh_print_info "Backing up the app before upgrading (may take a while)..."
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
+	ynh_clean_check_starting
 	# restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -65,16 +72,12 @@ ynh_clean_setup () {
 ynh_abort_if_errors
 
 #=================================================
-# CHECK THE PATH
+# STOP REEL2BITS SERVICES
 #=================================================
+ynh_print_info "Stopping Reel2bits services..."
 
-# Normalize the URL path syntax
-# N.B. : this is for app installations before YunoHost 2.7
-# where this value might be something like /foo/ or foo/
-# instead of /foo ....
-# If nobody installed your app before 2.7, then you may
-# safely remove this line
-path_url=$(ynh_normalize_url_path $path_url)
+ynh_systemd_action --action=stop --service_name=${app}-web --log_path=systemd --line_match="Stopped ${app}-web"
+ynh_systemd_action --action=stop --service_name=${app}-worker --log_path=systemd --line_match="Stopped ${app}-worker"
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -92,7 +95,7 @@ ynh_setup_source "$final_path"
 ynh_print_info "Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
-ynh_add_nginx_config
+ynh_add_nginx_config "app"
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -110,40 +113,68 @@ ynh_print_info "Making sure dedicated system user exists..."
 ynh_system_user_create $app
 
 #=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-ynh_print_info "Upgrading php-fpm configuration..."
-
-# Create a dedicated php-fpm config
-ynh_add_fpm_config
-
-#=================================================
 # SPECIFIC UPGRADE
 #=================================================
-# ...
+# MODIFY A CONFIG FILE
 #=================================================
 
-### Verify the checksum of a file, stored by `ynh_store_file_checksum` in the install script.
-### And create a backup of this file if the checksum is different. So the file will be backed up if the admin had modified it.
-ynh_backup_if_checksum_is_different "$final_path/CONFIG_FILE"
+config="$final_path/config.py"
+cp ../conf/config.py.sample "$config"
+
+ynh_replace_string "__LANGUAGE__" "$language" "$config"
+ynh_replace_string "__DATADIR__" "$datadir" "$config"
+ynh_replace_string "__DOMAIN__" "$domain" "$config"
+ynh_replace_string "__SECURITY_PASSWORD_SALT__" "$security_password_salt" "$config"
+ynh_replace_string "__SECRET_KEY__" "$secret_key" "$config"
+ynh_replace_string "__DB_USER__" "$db_user" "$config"
+ynh_replace_string "__DB_PWD__" "$db_pwd" "$config"
+ynh_replace_string "__DB_NAME__" "$db_name" "$config"
+ynh_replace_string "__FINAL_PATH__" "$final_path" "$config"
+
+ynh_backup_if_checksum_is_different "$config"
 # Recalculate and store the checksum of the file for the next upgrade.
-ynh_store_file_checksum "$final_path/CONFIG_FILE"
+ynh_store_file_checksum "$config"
 
 #=================================================
-# SETUP LOGROTATE
+# INSTALL PYTHONZ TO GET PYTHON 3.6
 #=================================================
-ynh_print_info "Upgrading logrotate configuration..."
 
-# Use logrotate to manage app-specific logfile(s)
-ynh_use_logrotate --non-append
+# Get pythonz
+# curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
+# ./pythonz-install
+ynh_setup_source "$final_path/.pythonz" pythonz
+export PYTHONZ_ROOT="$final_path/.pythonz"
+# Then install it
+python $final_path/.pythonz/pythonz_install.py
+
+# Install Python 3.6.6
+$final_path/.pythonz/bin/pythonz install 3.7.3
+
+#=================================================
+# INSTALL REEL2BITS
+#=================================================
+
+pushd $final_path
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.3) ve3
+	ve3/bin/pip3 install --requirement requirements.txt
+	ve3/bin/python3 setup.py install
+	export FLASK_ENV=production
+	ve3/bin/flask db upgrade
+	ve3/bin/pip3 install waitress
+	#ve3/bin/flask users create --password TEXT -a IDENTITY
+	#ve3/bin/flask roles add yalh@yh.yalh.net admin
+popd
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
 ynh_print_info "Upgrading systemd configuration..."
 
+ynh_replace_string "__PORT__" "$port" "../conf/reel2bits-web.service"
+
 # Create a dedicated systemd config
-ynh_add_systemd_config
+ynh_add_systemd_config "$app-web"       "reel2bits-web.service"
+ynh_add_systemd_config "$app-worker"       "reel2bits-worker.service"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -152,7 +183,7 @@ ynh_add_systemd_config
 #=================================================
 
 # Set permissions on app files
-chown -R root: $final_path
+chown -R $app:root $final_path
 
 #=================================================
 # SETUP SSOWAT
@@ -172,6 +203,14 @@ fi
 ynh_print_info "Reloading nginx web server..."
 
 systemctl reload nginx
+
+#=================================================
+# START REEL2BITS SERVICES
+#=================================================
+ynh_print_info "Starting Reel2bits services..."
+
+ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # END OF SCRIPT
