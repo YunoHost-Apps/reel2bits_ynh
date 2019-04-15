@@ -17,7 +17,7 @@ old_domain=$YNH_APP_OLD_DOMAIN
 old_path=$YNH_APP_OLD_PATH
 
 new_domain=$YNH_APP_NEW_DOMAIN
-new_path=$YNH_APP_NEW_PATH
+new_path="/"
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -83,8 +83,32 @@ fi
 #=================================================
 # SPECIFIC MODIFICATIONS
 #=================================================
-# ...
+# STOP REEL2BITS SERVICES
 #=================================================
+ynh_print_info "Stopping Reel2bits services..."
+
+ynh_systemd_action --action=stop --service_name=${app}-web --log_path=systemd --line_match="Stopped ${app}-web"
+ynh_systemd_action --action=stop --service_name=${app}-worker --log_path=systemd --line_match="Stopped ${app}-worker"
+
+#=================================================
+# MODIFY A CONFIG FILE
+#=================================================
+
+config="$final_path/config.py"
+
+ynh_replace_string "$old_domain" "$new_domain" "$config"
+
+ynh_backup_if_checksum_is_different "$config"
+# Recalculate and store the checksum of the file for the next upgrade.
+ynh_store_file_checksum "$config"
+
+#=================================================
+# START REEL2BITS SERVICES
+#=================================================
+ynh_print_info "Starting Reel2bits services..."
+
+ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # GENERIC FINALISATION
