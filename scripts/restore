@@ -66,14 +66,14 @@ ynh_restore_file "$final_path"
 ynh_print_info "Recreating the dedicated system user..."
 
 # Create the dedicated user (if not existing)
-ynh_system_user_create $app
+ynh_system_user_create $app "$final_path"
 
 #=================================================
 # RESTORE USER RIGHTS
 #=================================================
 
 # Restore permissions on app files
-chown -R $app:root $final_path
+chown -R "$app": "$final_path"
 
 #=================================================
 # RECREATE THE DATA DIRECTORY
@@ -87,7 +87,7 @@ mkdir -p "$datadir/uploads/waveforms"
 mkdir -p "$datadir/tmp"
 
 # Give permission to the datadir
-chown -R "$app":"$app" "$datadir"
+chown -R "$app": "$datadir"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -125,8 +125,8 @@ systemctl enable $app-worker.service
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add "$app-web"
-yunohost service add "$app-worker"
+yunohost service add "$app-web" --description "$app-web daemon for Reel2Bits"
+yunohost service add "$app-worker" --description "$app-worker daemon for Reel2Bits"
 
 #=================================================
 # GENERIC FINALIZATION

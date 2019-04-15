@@ -34,6 +34,7 @@ then
 	ynh_print_info "Removing $app-web service"
 	yunohost service remove "$app-web"
 fi
+
 if yunohost service status "$app-worker" >/dev/null 2>&1
 then
 	ynh_print_info "Removing $app-worker service"

@@ -24,10 +24,10 @@ final_path=$(ynh_app_setting_get $app final_path)
 language=$(ynh_app_setting_get $app language)
 db_name=$(ynh_app_setting_get $app db_name)
 db_user=$db_name
+db_pwd=$(ynh_app_setting_get $app db_pwd)
 datadir=$(ynh_app_setting_get $app datadir)
 security_password_salt=$(ynh_app_setting_get $app security_password_salt)
 secret_key=$(ynh_app_setting_get $app secret_key)
-db_pwd=$(ynh_app_setting_get $app db_pwd)
 port=$(ynh_app_setting_get $app port)
 
 #=================================================
@@ -95,7 +95,7 @@ ynh_setup_source "$final_path"
 ynh_print_info "Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
-ynh_add_nginx_config "app"
+ynh_add_nginx_config "datadir"
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -110,7 +110,7 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_print_info "Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create $app
+ynh_system_user_create $app "$final_path"
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -183,7 +183,7 @@ ynh_add_systemd_config "$app-worker"       "reel2bits-worker.service"
 #=================================================
 
 # Set permissions on app files
-chown -R $app:root $final_path
+chown -R "$app": "$final_path"
 
 #=================================================
 # SETUP SSOWAT

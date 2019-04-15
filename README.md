@@ -15,6 +15,7 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 1. **Reel2Bits** is under development
 1. **Reel2Bits** require a dedicated **root domain**, eg. reel2bits.domain.tld
+1. Even if requested during installation: admin, language and password variables are not used
 1. When your Reel2Bits instance is installed, you need to execute the following command to create a first user and give it admin rights: `(cd /var/www/reel2bits && ve3/bin/flask createuser)`
 
 ## Screenshots

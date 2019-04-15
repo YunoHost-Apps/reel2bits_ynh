@@ -35,6 +35,9 @@ secret_key=$(ynh_string_random 30)
 
 app=$YNH_APP_INSTANCE_NAME
 
+# Define app's data directory
+datadir="/home/yunohost.app/${app}"
+
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
@@ -58,6 +61,7 @@ ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app language $language
 ynh_app_setting_set $app security_password_salt $security_password_salt
 ynh_app_setting_set $app secret_key $secret_key
+ynh_app_setting_set $app datadir $datadir
 
 ynh_app_setting_set $app final_path $final_path
 
@@ -146,7 +150,7 @@ ynh_print_info "Configuring nginx web server..."
 ### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
 # Create a dedicated nginx config
-ynh_add_nginx_config "app"
+ynh_add_nginx_config "datadir"
 
 #=================================================
 # CREATE DEDICATED USER
@@ -154,7 +158,7 @@ ynh_add_nginx_config "app"
 ynh_print_info "Configuring system user..."
 
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create $app "$final_path"
 
 #=================================================
 # SPECIFIC SETUP
@@ -163,9 +167,6 @@ ynh_system_user_create $app
 #=================================================
 ynh_print_info "Create the data directory..."
 
-# Define app's data directory
-datadir="/home/yunohost.app/${app}"
-
 # Create app folders
 mkdir -p "$datadir"
 mkdir -p "$datadir/uploads/sounds"
@@ -173,9 +174,7 @@ mkdir -p "$datadir/uploads/waveforms"
 mkdir -p "$datadir/tmp"
 
 # Give permission to the datadir
-chown -R "$app":"$app" "$datadir"
-
-ynh_app_setting_set $app datadir $datadir
+chown -R "$app": "$datadir"
 
 #=================================================
 # MODIFY A CONFIG FILE
@@ -250,15 +249,15 @@ ynh_store_file_checksum "$config"
 #=================================================
 
 # Set permissions to app files
-chown -R $app:root $final_path
+chown -R "$app": "$final_path"
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
 #yunohost service add $app --description "$app daemon for XXX" --log "/var/log/$app/$app.log"
-yunohost service add "$app-web"
-yunohost service add "$app-worker"
+yunohost service add "$app-web" --description "$app-web daemon for Reel2Bits"
+yunohost service add "$app-worker" --description "$app-worker daemon for Reel2Bits"
 
 #=================================================
 # SETUP SSOWAT
