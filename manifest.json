@@ -6,14 +6,14 @@
         "en": "Soundcloud-like but simple, easy and KISS (and ActivityPub).",
         "fr": "Soundcloud-like mais simple, facile et KISS (et ActivityPub)."
     },
-    "version": "0.1~ynh1",
+    "version": "0.0.1-2019-04-12~ynh1",
     "url": "https://sound.otter.sh/user/dashie",
     "license": "MIT",
     "maintainer": {
         "name": "yalh76"
     },
     "requirements": {
-        "yunohost": ">= 3.4"
+        "yunohost": ">= 3.5"
     },
     "multi_instance": true,
     "services": [
@@ -31,16 +31,6 @@
                     "fr": "Choisissez un nom de domaine pour ynhexample"
                 },
                 "example": "example.com"
-            },
-            {
-                "name": "path",
-                "type": "path",
-                "ask": {
-                    "en": "Choose a path for ynhexample",
-                    "fr": "Choisissez un chemin pour ynhexample"
-                },
-                "example": "/example",
-                "default": "/example"
             },
             {
                 "name": "admin",
@@ -68,7 +58,7 @@
                     "fr": "Choisissez la langue de l'application"
                 },
                 "choices": ["fr", "en"],
-                "default": "fr"
+                "default": "en"
             },
             {
                 "name": "password",

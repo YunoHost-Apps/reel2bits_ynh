@@ -1,5 +1,5 @@
-SOURCE_URL=url of app's source
-SOURCE_SUM=sha256 checksum
+SOURCE_URL=https://github.com/rhaamo/reel2bits/archive/9d93d2aef8b37e0dfd29b21ade77eaaa0e1d8340.tar.gz
+SOURCE_SUM=08ae17b67f058aeb6af66cadd0df211b36248e18a87f95572e43e43c4fb76570
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true

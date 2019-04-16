@@ -1,0 +1,15 @@
+[Unit]
+Description=reel2bits-worker
+After=network.target
+
+[Service]
+Type=simple
+User=__APP__
+WorkingDirectory=__FINALPATH__
+Environment="FLASK_ENV=production"
+ExecStart=__FINALPATH__/ve3/bin/celery worker -A tasks.celery --loglevel=error
+TimeoutSec=15
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

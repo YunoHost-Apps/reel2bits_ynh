@@ -29,10 +29,16 @@ final_path=$(ynh_app_setting_get $app final_path)
 #=================================================
 
 # Remove a service from the admin panel, added by `yunohost service add`
-if yunohost service status $app >/dev/null 2>&1
+if yunohost service status "$app-web" >/dev/null 2>&1
 then
-	ynh_print_info "Removing $app service"
-	yunohost service remove $app
+	ynh_print_info "Removing $app-web service"
+	yunohost service remove "$app-web"
+fi
+
+if yunohost service status "$app-worker" >/dev/null 2>&1
+then
+	ynh_print_info "Removing $app-worker service"
+	yunohost service remove "$app-worker"
 fi
 
 #=================================================
@@ -41,15 +47,19 @@ fi
 ynh_print_info "Stopping and removing the systemd service"
 
 # Remove the dedicated systemd config
-ynh_remove_systemd_config
+ynh_remove_systemd_config "$app-web"
+ynh_remove_systemd_config "$app-worker"
 
 #=================================================
-# REMOVE THE MYSQL DATABASE
+# REMOVE THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Removing the MySQL database"
+ynh_print_info "Removing the PostgreSQL database"
+
+ynh_psql_execute_as_root "\connect $db_name 
+SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '$db_name';"
 
 # Remove a database if it exists, along with the associated user
-ynh_mysql_remove_db $db_user $db_name
+ynh_psql_remove_db "$db_name" "$db_name"
 
 #=================================================
 # REMOVE DEPENDENCIES
@@ -76,22 +86,6 @@ ynh_print_info "Removing nginx web server configuration"
 ynh_remove_nginx_config
 
 #=================================================
-# REMOVE PHP-FPM CONFIGURATION
-#=================================================
-ynh_print_info "Removing php-fpm configuration"
-
-# Remove the dedicated php-fpm config
-ynh_remove_fpm_config
-
-#=================================================
-# REMOVE LOGROTATE CONFIGURATION
-#=================================================
-ynh_print_info "Removing logrotate configuration"
-
-# Remove the app-specific logrotate config
-ynh_remove_logrotate
-
-#=================================================
 # CLOSE A PORT
 #=================================================
 
@@ -100,21 +94,6 @@ then
 	ynh_print_info "Closing port $port"
 	ynh_exec_warn_less yunohost firewall disallow TCP $port
 fi
-
-#=================================================
-# SPECIFIC REMOVE
-#=================================================
-# REMOVE THE CRON FILE
-#=================================================
-
-# Remove a cron file
-ynh_secure_remove "/etc/cron.d/$app"
-
-# Remove a directory securely
-ynh_secure_remove "/etc/$app/"
-
-# Remove the log files
-ynh_secure_remove "/var/log/$app/"
 
 #=================================================
 # GENERIC FINALIZATION
