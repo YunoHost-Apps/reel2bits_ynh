@@ -40,55 +40,56 @@ datadir="/home/yunohost.app/${app}"
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_print_info "Validating installation parameters..."
+ynh_print_info --message="Validating installation parameters..."
 
 final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
 # Register (book) web path
-ynh_webpath_register $app $domain $path_url
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_print_info "Storing installation settings..."
+ynh_print_info --message="Storing installation settings..."
 
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path_url
-ynh_app_setting_set $app admin $admin
-ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app language $language
-ynh_app_setting_set $app security_password_salt $security_password_salt
-ynh_app_setting_set $app secret_key $secret_key
-ynh_app_setting_set $app datadir $datadir
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=admin --value=$admin
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
+ynh_app_setting_set --app=$app --key=language --value=$language
+ynh_app_setting_set --app=$app --key=security_password_salt --value=$security_password_salt
+ynh_app_setting_set --app=$app --key=secret_key --value=$secret_key
+ynh_app_setting_set --app=$app --key=datadir --value=$datadir
 
-ynh_app_setting_set $app final_path $final_path
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_print_info "Configuring firewall..."
+ynh_print_info --message="Configuring firewall..."
 
 # Find a free port
-port=$(ynh_find_port 8095)
-ynh_app_setting_set $app port $port
+port=$(ynh_find_port --port=8095)
+
+ynh_app_setting_set --app=$app --key=port --value=$port
 
 #=================================================
 # INSTALL BUILD DEPENDENCIES
 #=================================================
-ynh_print_info "Installing build dependencies..."
+ynh_print_info --message="Installing build dependencies..."
 
 ynh_install_app_dependencies $build_dependencies
 
 #=================================================
 # BUILD AUDIOWAVEFORM
 #=================================================
-ynh_print_info "Building audiowaveform..."
+ynh_print_info --message="Building audiowaveform..."
 
-ynh_setup_source "$final_path/audiowaveform.d/audiowaveform" audiowaveform
-ynh_setup_source "$final_path/audiowaveform.d/googletest" googletest
+ynh_setup_source --dest_dir="$final_path/audiowaveform.d/audiowaveform" --source_id=audiowaveform
+ynh_setup_source --dest_dir="$final_path/audiowaveform.d/googletest" --source_id=googletest
 
 pushd "$final_path/audiowaveform.d/audiowaveform"
     ln -s $final_path/audiowaveform.d/googletest/googletest googletest
@@ -100,12 +101,12 @@ pushd "$final_path/audiowaveform.d/audiowaveform"
     cp $final_path/audiowaveform.d/audiowaveform/build/audiowaveform $final_path/.
 popd
 
-ynh_secure_remove "$final_path/audiowaveform.d/"
+ynh_secure_remove --file="$final_path/audiowaveform.d/"
 
 #=================================================
 # REMOVE BUILD DEPENDENCIES
 #=================================================
-ynh_print_info "Removing build dependencies"
+ynh_print_info --message="Removing build dependencies"
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
@@ -113,38 +114,36 @@ ynh_remove_app_dependencies
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_print_info "Installing dependencies..."
+ynh_print_info --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Creating a PostgreSQL database..."
+ynh_print_info --message="Creating a PostgreSQL database..."
 
-db_name=$(ynh_sanitize_dbid $app)
+db_name=$(ynh_sanitize_dbid --db_name=$app)
 db_user=$db_name
-db_pwd=$(ynh_string_random 30)
-ynh_app_setting_set "$app" db_name "$db_name"
-ynh_app_setting_set "$app" db_pwd "$db_pwd"
+db_pwd=$(ynh_string_random --length=30)
+ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+ynh_app_setting_set --app=$app --key=db_pwd --value=$db_pwd
 ynh_psql_test_if_first_run
-ynh_psql_create_user "$app" "$db_pwd"
-ynh_psql_execute_as_root "CREATE DATABASE $db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $db_user;"
-ynh_psql_execute_as_root "\connect $db_name 
-CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
+ynh_psql_setup_db --db_user=$db_user --db_name=$db_name --db_pwd=$db_pwd
+ynh_psql_execute_as_root --sql="CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";" --database=$db_name
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_print_info "Setting up source files..."
+ynh_print_info --message="Setting up source files..."
 
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source "$final_path"
+ynh_setup_source --dest_dir="$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info "Configuring nginx web server..."
+ynh_print_info --message="Configuring nginx web server..."
 
 ### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
@@ -154,17 +153,17 @@ ynh_add_nginx_config "datadir"
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info "Configuring system user..."
+ynh_print_info --message="Configuring system user..."
 
 # Create a system user
-ynh_system_user_create $app "$final_path"
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # SPECIFIC SETUP
 #=================================================
 # CREATE THE DATA DIRECTORY
 #=================================================
-ynh_print_info "Create the data directory..."
+ynh_print_info --message="Create the data directory..."
 
 # Create app folders
 mkdir -p "$datadir"
@@ -182,15 +181,15 @@ chown -R "$app": "$datadir"
 config="$final_path/config.py"
 cp ../conf/config.py.sample "$config"
 
-ynh_replace_string "__LANGUAGE__" "$language" "$config"
-ynh_replace_string "__DATADIR__" "$datadir" "$config"
-ynh_replace_string "__DOMAIN__" "$domain" "$config"
-ynh_replace_string "__SECURITY_PASSWORD_SALT__" "$security_password_salt" "$config"
-ynh_replace_string "__SECRET_KEY__" "$secret_key" "$config"
-ynh_replace_string "__DB_USER__" "$db_user" "$config"
-ynh_replace_string "__DB_PWD__" "$db_pwd" "$config"
-ynh_replace_string "__DB_NAME__" "$db_name" "$config"
-ynh_replace_string "__FINAL_PATH__" "$final_path" "$config"
+ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --target_file="$config"
+ynh_replace_string --match_string="__DATADIR__" --replace_string="$datadir" --target_file="$config"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+ynh_replace_string --match_string="__SECURITY_PASSWORD_SALT__" --replace_string="$security_password_salt" --target_file="$config"
+ynh_replace_string --match_string="__SECRET_KEY__" --replace_string="$secret_key" --target_file="$config"
+ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$config"
+ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
+ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
+ynh_replace_string --match_string="__FINAL_PATH__" --replace_string="$final_path" --target_file="$config"
 
 #=================================================
 # INSTALL PYTHONZ TO GET PYTHON 3.6
@@ -226,20 +225,20 @@ popd
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_print_info "Configuring a systemd service..."
+ynh_print_info --message="Configuring a systemd service..."
 
-ynh_replace_string "__PORT__" "$port" "../conf/reel2bits-web.service"
+ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="../conf/reel2bits-web.service"
 
 # Create a dedicated systemd config
-ynh_add_systemd_config "$app-web"       "reel2bits-web.service"
-ynh_add_systemd_config "$app-worker"       "reel2bits-worker.service"
+ynh_add_systemd_config --service="$app-web" --template="reel2bits-web.service"
+ynh_add_systemd_config --service="$app-worker" --template="reel2bits-worker.service"
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$config"
+ynh_store_file_checksum --file="$config"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -259,34 +258,34 @@ yunohost service add "$app-web" --description "$app-web daemon for Reel2Bits"
 yunohost service add "$app-worker" --description "$app-worker daemon for Reel2Bits"
 
 #=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_print_info --message="Starting a systemd service..."
+
+ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --service_name=${app}-worker --action="start" --log_path=systemd --line_match="Started ${app}-worker"
+
+#=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_print_info "Configuring SSOwat..."
+ynh_print_info --message="Configuring SSOwat..."
 
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
 	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set $app unprotected_uris "/"
+	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 fi
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info "Reloading nginx web server..."
+ynh_print_info --message="Reloading nginx web server..."
 
-systemctl reload nginx
-
-#=================================================
-# START REEL2BITS SERVICES
-#=================================================
-ynh_print_info "Starting Reel2bits services..."
-
-ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
-ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
+ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info "Installation of $app completed"
+ynh_print_info --message="Installation of $app completed"
