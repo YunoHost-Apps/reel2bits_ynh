@@ -9,7 +9,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 ## Overview
 Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
-**Shipped version:** 0.0.1-2019-04-12
+**Shipped version:** 0.0.1-2019-05-15
 
 ## Important
 
@@ -30,14 +30,14 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 #### Supported architectures
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/reel2bits%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/reel2bits/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/reel2bits%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/reel2bits/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/reel2bits%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/reel2bits/)
+* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/reel2bits%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/reel2bits/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/reel2bits%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/reel2bits/)
+* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/reel2bits%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/reel2bits/)
 
 ## Links
 
  * Report a bug: https://github.com/YunoHost-Apps/reel2bits_ynh/issues
- * Git website: https://github.com/rhaamo/reel2bits
+ * Upstream app repository: https://github.com/rhaamo/reel2bits
  * YunoHost website: https://yunohost.org/
 
 ---

@@ -23,65 +23,65 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info "Loading installation settings..."
+ynh_print_info --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
-final_path=$(ynh_app_setting_get $app final_path)
-domain=$(ynh_app_setting_get $app domain)
-db_name=$(ynh_app_setting_get $app db_name)
-
-#=================================================
-# STOP REEL2BITS SERVICES
-#=================================================
-ynh_print_info "Stopping Reel2bits services..."
-
-ynh_systemd_action --action=stop --service_name=${app}-web --log_path=systemd --line_match="Stopped ${app}-web"
-ynh_systemd_action --action=stop --service_name=${app}-worker --log_path=systemd --line_match="Stopped ${app}-worker"
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 
 #=================================================
 # STANDARD BACKUP STEPS
 #=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_print_info --message="Stopping a systemd service..."
+
+ynh_systemd_action --service_name=${app}-web --action="stop" --log_path=systemd --line_match="Stopped ${app}-web"
+ynh_systemd_action --service_name=${app}-worker --action="stop" --log_path=systemd --line_match="Stopped ${app}-worker"
+
+#=================================================
 # BACKUP THE APP MAIN DIR
 #=================================================
-ynh_print_info "Backing up the main app directory..."
+ynh_print_info --message="Backing up the main app directory..."
 
-ynh_backup "$final_path"
+ynh_backup --src_path="$final_path"
 
 #=================================================
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
-ynh_print_info "Backing up nginx web server configuration..."
+ynh_print_info --message="Backing up nginx web server configuration..."
 
-ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # BACKUP THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Backing up the PostgreSQL database..."
+ynh_print_info --message="Backing up the PostgreSQL database..."
 
-ynh_psql_dump_db "$db_name" > db.sql
+ynh_psql_dump_db --database="$db_name" > db.sql
 
 #=================================================
 # SPECIFIC BACKUP
 #=================================================
 # BACKUP SYSTEMD
 #=================================================
-ynh_print_info "Backing up systemd configuration..."
+ynh_print_info --message="Backing up systemd configuration..."
 
-ynh_backup "/etc/systemd/system/$app-web.service"
-ynh_backup "/etc/systemd/system/$app-worker.service"
+ynh_backup --src_path="/etc/systemd/system/$app-web.service"
+ynh_backup --src_path="/etc/systemd/system/$app-worker.service"
 
 #=================================================
-# START REEL2BITS SERVICES
+# START SYSTEMD SERVICE
 #=================================================
-ynh_print_info "Starting Reel2bits services..."
+ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --action=start --service_name=${app}-web --log_path=systemd --line_match="Started ${app}-web"
-ynh_systemd_action --action=start --service_name=${app}-worker --log_path=systemd --line_match="Started ${app}-worker"
+ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --service_name=${app}-worker --action="start" --log_path=systemd --line_match="Started ${app}-worker"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info "Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
+ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
