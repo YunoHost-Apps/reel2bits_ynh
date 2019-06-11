@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_add_swap
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -82,6 +83,13 @@ ynh_app_setting_set --app=$app --key=port --value=$port
 ynh_print_info --message="Installing build dependencies..."
 
 ynh_install_app_dependencies $build_dependencies
+
+#=================================================
+# ADD SWAP
+#=================================================
+ynh_print_info --message="Adding $swap_needed Mo to swap..."
+
+ynh_add_swap --size=$swap_needed
 
 #=================================================
 # BUILD AUDIOWAVEFORM

@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_add_swap
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -65,6 +66,13 @@ ynh_print_info --message="Removing dependencies..."
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
+
+#=================================================
+# REMOVE SWAP
+#=================================================
+ynh_print_info --message="Removing $swap_needed Mo to swap..."
+
+ynh_del_swap
 
 #=================================================
 # REMOVE APP MAIN DIR
