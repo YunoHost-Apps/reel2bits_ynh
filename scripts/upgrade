@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_add_swap
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -113,6 +114,13 @@ ynh_add_nginx_config "datadir"
 ynh_print_info --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+
+#=================================================
+# ADD SWAP
+#=================================================
+ynh_print_info --message="Adding $swap_needed Mo to swap..."
+
+ynh_add_swap --size=$swap_needed
 
 #=================================================
 # CREATE DEDICATED USER
