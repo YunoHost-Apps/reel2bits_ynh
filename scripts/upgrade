@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_add_swap
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -115,6 +116,13 @@ ynh_print_info --message="Upgrading dependencies..."
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
+# ADD SWAP
+#=================================================
+ynh_print_info --message="Adding $swap_needed Mo to swap..."
+
+ynh_add_swap --size=$swap_needed
+
+#=================================================
 # CREATE DEDICATED USER
 #=================================================
 ynh_print_info --message="Making sure dedicated system user exists..."
@@ -129,6 +137,7 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 
 config="$final_path/config.py"
+ynh_backup_if_checksum_is_different --file="$config"
 cp ../conf/config.py.sample "$config"
 
 ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --target_file="$config"
@@ -145,7 +154,6 @@ ynh_replace_string --match_string="__FINAL_PATH__" --replace_string="$final_path
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
 
-ynh_backup_if_checksum_is_different --file="$config"
 # Recalculate and store the checksum of the file for the next upgrade.
 ynh_store_file_checksum --file="$config"
 
