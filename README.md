@@ -11,7 +11,7 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 **Shipped version:** 0.0.1-2019-06-26
 
-## Important
+## Important points to read before installing
 
 1. **Reel2Bits** is under development
 1. **Reel2Bits** require a dedicated **root domain**, eg. reel2bits.domain.tld
