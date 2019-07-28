@@ -170,14 +170,14 @@ export PYTHONZ_ROOT="$final_path/.pythonz"
 python $final_path/.pythonz/pythonz_install.py
 
 # Install Python 3.6.6
-$final_path/.pythonz/bin/pythonz install 3.7.3
+$final_path/.pythonz/bin/pythonz install 3.7.4
 
 #=================================================
 # INSTALL REEL2BITS
 #=================================================
 
 pushd $final_path
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.3) ve3
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.4) ve3
 	ve3/bin/pip3 install --requirement requirements.txt
 	ve3/bin/python3 setup.py install
 	export FLASK_ENV=production
