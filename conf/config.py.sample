@@ -10,7 +10,6 @@ TEMP_DOWNLOAD_FOLDER = "__DATADIR__/tmp"
 AUDIOWAVEFORM_BIN = "__FINAL_PATH__/audiowaveform"
 
 # If using sentry, set a DSN
-SENTRY_USER_ATTRS = ['name', 'email']
 SENTRY_DSN = ""
 
 # Redis configuration for broker, used for async background tasks
@@ -22,6 +21,11 @@ CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
 AP_DOMAIN = "__DOMAIN__"
 SERVER_NAME = AP_DOMAIN
 BASE_URL = "https://" + AP_DOMAIN
+# Should we enable federation
+AP_ENABLED = True
+# Federation notes:
+# ActivityPub support isn't finished and things like update or delete might not work at all
+# Activate federation at your own risks
 
 SQLALCHEMY_DATABASE_URI = \
     'postgresql+psycopg2://__DB_USER__:__DB_PWD__@localhost/__DB_NAME__'
@@ -71,3 +75,5 @@ BOOTSTRAP_USE_MINIFIED = True
 BOOTSTRAP_SERVE_LOCAL = True
 BOOTSTRAP_QUERYSTRING_REVVING = True
 BABEL_DEFAULT_TIMEZONE = "UTC"
+
+WTF_CSRF_ENABLED = True
