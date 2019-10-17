@@ -1,13 +1,15 @@
 [Unit]
 Description=reel2bits-web
 After=network.target
+PartOf=reel2bits.target
 
 [Service]
 Type=simple
 User=__APP__
-WorkingDirectory=__FINALPATH__
+WorkingDirectory=__FINALPATH__/api
 Environment="FLASK_ENV=production"
-ExecStart=__FINALPATH__/ve3/bin/waitress-serve --host 0.0.0.0 --port __PORT__ --call 'app:create_app'
+Environment="APP_SETTINGS=config.prod_secret.Config"
+ExecStart=__FINALPATH__/api/ve3/bin/waitress-serve --host 127.0.0.1 --port __PORT__ --call 'app:create_app'
 TimeoutSec=15
 Restart=always
 

@@ -9,14 +9,14 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 ## Overview
 Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
-**Shipped version:** 0.0.1-2019-07-28
+**Shipped version:** 0.0.1-2019-10-16
 
 ## Important points to read before installing
 
 1. **Reel2Bits** is under development
 1. **Reel2Bits** require a dedicated **root domain**, eg. reel2bits.domain.tld
 1. Even if requested during installation: admin, language and password variables are not used
-1. When your Reel2Bits instance is installed, you need to execute the following command to create a first user and give it admin rights: `(cd /var/www/reel2bits && ve3/bin/flask createuser)`
+1. When your Reel2Bits instance is installed, you need to execute the following command to create a first user and give it admin rights: `(cd /var/www/reel2bits/api && export APP_SETTINGS=config.prod_secret.Config && ve3/bin/flask users create)`
 
 ## Screenshots
 
