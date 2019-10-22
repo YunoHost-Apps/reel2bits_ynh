@@ -182,7 +182,7 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 ynh_store_file_checksum --file="$api_config"
 
 #=================================================
-# INSTALL PYTHONZ TO GET PYTHON 3.6
+# INSTALL PYTHONZ TO GET PYTHON 3.7.5
 #=================================================
 
 # Get pythonz
@@ -193,15 +193,15 @@ export PYTHONZ_ROOT="$final_path/.pythonz"
 # Then install it
 python $final_path/.pythonz/pythonz_install.py
 
-# Install Python 3.6.6
-$final_path/.pythonz/bin/pythonz install 3.7.4
+# Install Python 3.7.5
+$final_path/.pythonz/bin/pythonz install 3.7.5
 
 #=================================================
 # INSTALL REEL2BITS
 #=================================================
 
 pushd $final_path/api
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.4) ve3
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.5) ve3
 	ve3/bin/pip3 install wheel
 	ve3/bin/pip3 install --requirement requirements.txt
 	#ve3/bin/python3 setup.py install

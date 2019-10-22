@@ -31,6 +31,7 @@ class Config(BaseConfig):
     # Is the ActivityPub backend active ?
     # Even at False, you needs to setup the AP_DOMAIN because it is used
     # by more things than just ActivityPub
+    AP_DOMAIN = "__DOMAIN__"
     AP_ENABLED = True
 
     # Can the users register on your instance ?
@@ -49,3 +50,4 @@ class Config(BaseConfig):
 
     CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
     CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+    

@@ -1,6 +1,6 @@
-SOURCE_URL=https://github.com/rhaamo/reel2bits/archive/eb3b50c13cc8f589ce38464af1cadb6dbedb186c.tar.gz
-SOURCE_SUM=fc95511432fedc2fbbbc856f84db72863a1ebcb8519295872c1c9ed8d973cf00
+SOURCE_URL=https://github.com/rhaamo/reel2bits/archive/0d2e31bb4b614fd3ad2015c2e5ec513948084027.tar.gz
+SOURCE_SUM=f8c78bfc7cd3c6bdc868861d755c3abb5cc42c4a8b15771c5db263b44c192178
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=0.0.1-2019-10-16.tar.gz
+SOURCE_FILENAME=0.0.1-2019-10-22.tar.gz
