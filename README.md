@@ -24,7 +24,7 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 ## Demo
 
-* [Official demo](https://sound.otter.sh/user/dashie)
+* [Official demo](https://demo.reel2bits.org/)
 
 ## YunoHost specific features
 
