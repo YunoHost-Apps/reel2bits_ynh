@@ -9,7 +9,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 ## Overview
 Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
-**Shipped version:** 0.0.1-2019-11-22
+**Shipped version:** 0.0.1-2019-12-28
 
 ## Important points to read before installing
 

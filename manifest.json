@@ -6,7 +6,7 @@
         "en": "Soundcloud-like but simple, easy and KISS (and ActivityPub).",
         "fr": "Soundcloud-like mais simple, facile et KISS (et ActivityPub)."
     },
-    "version": "0.0.1-2019-11-22~ynh1",
+    "version": "0.0.1-2019-12-28~ynh1",
     "url": "https://sound.otter.sh/user/dashie",
     "license": "AGPL-3.0-or-later",
     "maintainer": {
