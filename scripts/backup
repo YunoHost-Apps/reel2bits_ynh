@@ -40,6 +40,7 @@ ynh_print_info --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=${app}-web --action="stop" --log_path=systemd --line_match="Stopped ${app}-web"
 ynh_systemd_action --service_name=${app}-worker --action="stop" --log_path=systemd --line_match="Stopped ${app}-worker"
+systemctl stop $app.target
 
 #=================================================
 # BACKUP THE APP MAIN DIR
@@ -69,6 +70,7 @@ ynh_psql_dump_db --database="$db_name" > db.sql
 #=================================================
 ynh_print_info --message="Backing up systemd configuration..."
 
+ynh_backup --src_path="/etc/systemd/system/$app.target"
 ynh_backup --src_path="/etc/systemd/system/$app-web.service"
 ynh_backup --src_path="/etc/systemd/system/$app-worker.service"
 
@@ -79,6 +81,7 @@ ynh_print_info --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
 ynh_systemd_action --service_name=${app}-worker --action="start" --log_path=systemd --line_match="Started ${app}-worker"
+systemctl start $app.target
 
 #=================================================
 # END OF SCRIPT

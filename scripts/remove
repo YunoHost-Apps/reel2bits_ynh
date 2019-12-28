@@ -42,6 +42,12 @@ then
 	yunohost service remove "$app-worker"
 fi
 
+if yunohost service status "$app" >/dev/null 2>&1
+then
+	ynh_print_info --message="Removing $app service..."
+	yunohost service remove "$app"
+fi
+
 #=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
@@ -50,6 +56,7 @@ ynh_print_info --message="Stopping and removing the systemd service..."
 # Remove the dedicated systemd config
 ynh_remove_systemd_config --service="$app-web"
 ynh_remove_systemd_config --service="$app-worker"
+ynh_remove_systemd_config --service="$app"
 
 #=================================================
 # REMOVE THE POSTGRESQL DATABASE

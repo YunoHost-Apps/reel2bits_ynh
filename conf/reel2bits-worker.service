@@ -1,13 +1,15 @@
 [Unit]
 Description=reel2bits-worker
 After=network.target
+PartOf=reel2bits.target
 
 [Service]
 Type=simple
 User=__APP__
-WorkingDirectory=__FINALPATH__
+WorkingDirectory=__FINALPATH__/api
 Environment="FLASK_ENV=production"
-ExecStart=__FINALPATH__/ve3/bin/celery worker -A tasks.celery --loglevel=error
+Environment="APP_SETTINGS=config.prod_secret.Config"
+ExecStart=__FINALPATH__/api/ve3/bin/celery worker -A tasks.celery -l INFO
 TimeoutSec=15
 Restart=always
 
