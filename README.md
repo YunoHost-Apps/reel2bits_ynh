@@ -20,7 +20,7 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 ## Screenshots
 
-![](https://user-images.githubusercontent.com/30271971/55600937-96335680-575e-11e9-947c-23fcfbd04715.PNG)
+![](https://user-images.githubusercontent.com/30271971/71564281-89018900-2a9e-11ea-88be-c12034c5350b.png)
 
 ## Demo
 
