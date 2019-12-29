@@ -13,6 +13,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
+ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
 	ynh_clean_check_starting
@@ -23,6 +24,7 @@ ynh_abort_if_errors
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
+ynh_print_info --message="Retrieving arguments from the manifest..."
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url="/"
@@ -63,8 +65,6 @@ ynh_app_setting_set --app=$app --key=security_password_salt --value=$security_pa
 ynh_app_setting_set --app=$app --key=secret_key --value=$secret_key
 ynh_app_setting_set --app=$app --key=datadir --value=$datadir
 
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
@@ -72,17 +72,9 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 #=================================================
 ynh_print_info --message="Configuring firewall..."
 
-# Find a free port
+# Find an available port
 port=$(ynh_find_port --port=8095)
-
 ynh_app_setting_set --app=$app --key=port --value=$port
-
-#=================================================
-# INSTALL BUILD DEPENDENCIES
-#=================================================
-ynh_print_info --message="Installing build dependencies..."
-
-ynh_install_app_dependencies $build_dependencies
 
 #=================================================
 # ADD SWAP
@@ -90,6 +82,13 @@ ynh_install_app_dependencies $build_dependencies
 ynh_print_info --message="Adding $swap_needed Mo to swap..."
 
 ynh_add_swap --size=$swap_needed
+
+#=================================================
+# INSTALL BUILD DEPENDENCIES
+#=================================================
+ynh_print_info --message="Installing build dependencies..."
+
+ynh_install_app_dependencies $build_dependencies
 
 #=================================================
 # BUILD AUDIOWAVEFORM
@@ -145,6 +144,7 @@ ynh_psql_execute_as_root --sql="CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";" -
 #=================================================
 ynh_print_info --message="Setting up source files..."
 
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
 
@@ -154,8 +154,6 @@ ynh_setup_source --dest_dir="$final_path/front/dist" --source_id=front
 # NGINX CONFIGURATION
 #=================================================
 ynh_print_info --message="Configuring nginx web server..."
-
-### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
 # Create a dedicated nginx config
 ynh_add_nginx_config "datadir"
@@ -189,6 +187,7 @@ chown -R "$app": "$datadir"
 #=================================================
 # MODIFY A CONFIG FILE
 #=================================================
+ynh_print_info --message="Modifying a config file..."
 
 api_config="$final_path/api/config/prod_secret.py"
 cp ../conf/prod_secret.py "$api_config"
@@ -209,6 +208,7 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 #=================================================
 # INSTALL PYTHONZ TO GET PYTHON 3.7.5
 #=================================================
+ynh_print_info --message="Installing Python 3.7.5..."
 
 # Get pythonz
 # curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
@@ -224,6 +224,7 @@ $final_path/.pythonz/bin/pythonz install 3.7.5
 #=================================================
 # INSTALL REEL2BITS
 #=================================================
+ynh_print_info --message="Installing Reel2Bits..."
 
 # Set permissions to app files
 chown -R "$app": "$final_path"
@@ -257,6 +258,7 @@ ynh_add_systemd_config --service="$app-worker" --template="reel2bits-worker.serv
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
+ynh_print_info --message="Storing the config file checksum..."
 
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum --file="$api_config"
@@ -267,24 +269,26 @@ ynh_store_file_checksum --file="$front_config"
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
+ynh_print_info --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R "$app": "$final_path"
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
+ynh_print_info --message="Integrating service in YunoHost..."
 
-#yunohost service add $app --description "$app daemon for XXX" --log "/var/log/$app/$app.log"
-yunohost service add "$app-web" --description "$app-web daemon for Reel2Bits"
-yunohost service add "$app-worker" --description "$app-worker daemon for Reel2Bits"
-yunohost service add "$app" --description "$app daemon for Reel2Bits"
+yunohost service add $app-web --description "$app-web daemon for Reel2Bits"
+yunohost service add $app-worker --description "$app-worker daemon for Reel2Bits"
+yunohost service add $app --description "$app daemon for Reel2Bits"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
+# Start a systemd service
 ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
 ynh_systemd_action --service_name=${app}-worker --action="start" --log_path=systemd --line_match="Started ${app}-worker"
 systemctl start $app.target
