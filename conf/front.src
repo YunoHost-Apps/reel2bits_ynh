@@ -1,5 +1,5 @@
 SOURCE_URL=https://assets.reel2bits.org/front-dist-master.zip
-SOURCE_SUM=91e55cdf469ead361d257414c52865d4e5dd5cc16c5aae30527bfafdce924a0c
+SOURCE_SUM=66e3efb2e96a173a6d1404770951d486d1cf6df9bac38ff463c0ef49e6ab7810
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=zip
 SOURCE_IN_SUBDIR=true
