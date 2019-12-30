@@ -14,6 +14,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
+ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
 	ynh_clean_check_starting
@@ -72,6 +73,7 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # RESTORE USER RIGHTS
 #=================================================
+ynh_print_info --message="Restoring user rights..."
 
 # Restore permissions on app files
 chown -R "$app": "$final_path"
@@ -95,19 +97,19 @@ chown -R "$app": "$datadir"
 #=================================================
 # SPECIFIC RESTORATION
 #=================================================
+# ADD SWAP
+#=================================================
+ynh_print_info --message="Adding $swap_needed Mo to swap..."
+
+ynh_add_swap --size=$swap_needed
+
+#=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
 ynh_print_info --message="Reinstalling dependencies..."
 
 # Define and install dependencies
 ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# ADD SWAP
-#=================================================
-ynh_print_info --message="Adding $swap_needed Mo to swap..."
-
-ynh_add_swap --size=$swap_needed
 
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
@@ -133,8 +135,9 @@ systemctl enable $app-worker.service
 systemctl enable $app.target
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
+ynh_print_info --message="Integrating service in YunoHost..."
 
 yunohost service add "$app-web" --description "$app-web daemon for Reel2Bits"
 yunohost service add "$app-worker" --description "$app-worker daemon for Reel2Bits"
@@ -145,8 +148,8 @@ yunohost service add "$app" --description "$app daemon for Reel2Bits"
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=${app}-web --action=start --log_path=systemd --line_match="Started ${app}-web"
-ynh_systemd_action --service_name=${app}-worker --action=start --log_path=systemd --line_match="Started ${app}-worker"
+ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --service_name=${app}-worker --action="start" --log_path=systemd --line_match="Started ${app}-worker"
 systemctl start $app.target
 
 #=================================================

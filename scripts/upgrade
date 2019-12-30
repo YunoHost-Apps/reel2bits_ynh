@@ -118,13 +118,6 @@ ynh_print_info --message="Upgrading dependencies..."
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
-# ADD SWAP
-#=================================================
-ynh_print_info --message="Adding $swap_needed Mo to swap..."
-
-ynh_add_swap --size=$swap_needed
-
-#=================================================
 # CREATE DEDICATED USER
 #=================================================
 ynh_print_info --message="Making sure dedicated system user exists..."
@@ -134,6 +127,13 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # SPECIFIC UPGRADE
+#=================================================
+# ADD SWAP
+#=================================================
+ynh_print_info --message="Adding $swap_needed Mo to swap..."
+
+ynh_add_swap --size=$swap_needed
+
 #=================================================
 # CREATE THE DATA DIRECTORY
 #=================================================
@@ -153,6 +153,7 @@ chown -R "$app": "$datadir"
 #=================================================
 # MODIFY A CONFIG FILE
 #=================================================
+ynh_print_info --message="Modifying a config file..."
 
 api_config="$final_path/api/config/prod_secret.py"
 ynh_backup_if_checksum_is_different --file="$api_config"
@@ -176,6 +177,7 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
+ynh_print_info --message="Storing the config file checksum..."
 
 # Recalculate and store the checksum of the file for the next upgrade.
 ynh_store_file_checksum --file="$api_config"
@@ -183,6 +185,7 @@ ynh_store_file_checksum --file="$api_config"
 #=================================================
 # INSTALL PYTHONZ TO GET PYTHON 3.7.5
 #=================================================
+ynh_print_info --message="Installing Python 3.7.5..."
 
 # Get pythonz
 # curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
@@ -198,6 +201,7 @@ $final_path/.pythonz/bin/pythonz install 3.7.5
 #=================================================
 # INSTALL REEL2BITS
 #=================================================
+ynh_print_info --message="Installing Reel2Bits..."
 
 pushd $final_path/api
 	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.5) ve3
@@ -228,6 +232,7 @@ ynh_add_systemd_config --service="$app-worker" --template="reel2bits-worker.serv
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
+ynh_print_info --message="Securing files and directories..."
 
 # Set permissions on app files
 chown -R "$app": "$final_path"
@@ -249,8 +254,8 @@ fi
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=${app}-web --action=start --log_path=systemd --line_match="Started ${app}-web"
-ynh_systemd_action --service_name=${app}-worker --action=start --log_path=systemd --line_match="Started ${app}-worker"
+ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
+ynh_systemd_action --service_name=${app}-worker --action="start" --log_path=systemd --line_match="Started ${app}-worker"
 systemctl start $app.target
 
 #=================================================
