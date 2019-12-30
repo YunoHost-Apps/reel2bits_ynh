@@ -20,7 +20,7 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 ## Screenshots
 
-![](https://user-images.githubusercontent.com/30271971/55600937-96335680-575e-11e9-947c-23fcfbd04715.PNG)
+![](https://user-images.githubusercontent.com/30271971/71564281-89018900-2a9e-11ea-88be-c12034c5350b.png)
 
 ## Demo
 
@@ -32,7 +32,6 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 * x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/reel2bits%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/reel2bits/)
 * ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/reel2bits%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/reel2bits/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/reel2bits%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/reel2bits/)
 
 ## Links
 

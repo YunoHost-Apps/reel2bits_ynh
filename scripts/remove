@@ -26,8 +26,9 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 #=================================================
 # STANDARD REMOVE
 #=================================================
-# REMOVE SERVICE FROM ADMIN PANEL
+# REMOVE SERVICE INTEGRATION IN YUNOHOST
 #=================================================
+ynh_print_info --message="Removing service integration in YunoHost..."
 
 # Remove a service from the admin panel, added by `yunohost service add`
 if yunohost service status "$app-web" >/dev/null 2>&1
@@ -100,10 +101,11 @@ ynh_remove_nginx_config
 #=================================================
 # CLOSE A PORT
 #=================================================
+ynh_print_info --message="Closing a port"
 
 if yunohost firewall list | grep -q "\- $port$"
 then
-	ynh_script_progression --message="Closing port $port..."
+	ynh_print_info --message="Closing port $port..."
 	ynh_exec_warn_less yunohost firewall disallow TCP $port
 fi
 
