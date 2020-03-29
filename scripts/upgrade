@@ -98,6 +98,7 @@ then
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path"
+	ynh_replace_string --match_string="flasgger==0.9.3" --replace_string="flasgger==0.9.4" --target_file="$final_path/api/requirements.txt"
 
 	ynh_setup_source --dest_dir="$final_path/front/dist" --source_id=front
 fi
