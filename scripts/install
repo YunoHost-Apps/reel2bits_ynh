@@ -16,6 +16,7 @@ source /usr/share/yunohost/helpers
 ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
+	read -p "key"
 	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
@@ -148,6 +149,8 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
 ynh_replace_string --match_string="flasgger==0.9.3" --replace_string="flasgger==0.9.4" --target_file="$final_path/api/requirements.txt"
+ynh_replace_string --match_string="Flask_Babelex==0.9.3" --replace_string="Flask_Babelex>=0.9.4" --target_file="$final_path/api/requirements.txt"
+ynh_replace_string --match_string="flask_uploads==0.2.1" --replace_string="flask_uploads>=0.2.1" --target_file="$final_path/api/requirements.txt"
 
 ynh_setup_source --dest_dir="$final_path/front/dist" --source_id=front
 
@@ -233,6 +236,7 @@ chown -R "$app": "$final_path"
 pushd $final_path/api
 	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.5) ve3
 	ve3/bin/pip3 install wheel
+	ve3/bin/pip3 install werkzeug==0.16.1
 	ve3/bin/pip3 install --requirement requirements.txt
 	#ve3/bin/python3 setup.py install
 	export APP_SETTINGS=config.prod_secret.Config
