@@ -209,9 +209,9 @@ cp ../conf/local.example.json "$front_config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$front_config"
 
 #=================================================
-# INSTALL PYTHONZ TO GET PYTHON 3.7.5
+# INSTALL PYTHONZ TO GET PYTHON
 #=================================================
-ynh_print_info --message="Installing Python 3.7.5..."
+ynh_print_info --message="Installing Python..."
 
 # Get pythonz
 # curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
@@ -221,8 +221,8 @@ export PYTHONZ_ROOT="$final_path/.pythonz"
 # Then install it
 python $final_path/.pythonz/pythonz_install.py
 
-# Install Python 3.7.5
-$final_path/.pythonz/bin/pythonz install 3.7.5
+# Install Python
+$final_path/.pythonz/bin/pythonz install $python_version
 
 #=================================================
 # INSTALL REEL2BITS
@@ -233,7 +233,7 @@ ynh_print_info --message="Installing Reel2Bits..."
 chown -R "$app": "$final_path"
 
 pushd $final_path/api
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.5) ve3
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve3
 	ve3/bin/pip3 install wheel
 	ve3/bin/pip3 install werkzeug==0.16.1
 	ve3/bin/pip3 install --requirement requirements.txt

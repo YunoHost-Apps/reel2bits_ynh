@@ -186,9 +186,9 @@ ynh_print_info --message="Storing the config file checksum..."
 ynh_store_file_checksum --file="$api_config"
 
 #=================================================
-# INSTALL PYTHONZ TO GET PYTHON 3.7.5
+# INSTALL PYTHONZ TO GET PYTHON
 #=================================================
-ynh_print_info --message="Installing Python 3.7.5..."
+ynh_print_info --message="Installing Python..."
 
 # Get pythonz
 # curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
@@ -198,8 +198,8 @@ export PYTHONZ_ROOT="$final_path/.pythonz"
 # Then install it
 python $final_path/.pythonz/pythonz_install.py
 
-# Install Python 3.7.5
-$final_path/.pythonz/bin/pythonz install 3.7.5
+# Install Python
+$final_path/.pythonz/bin/pythonz install $python_version
 
 #=================================================
 # INSTALL REEL2BITS
@@ -207,7 +207,7 @@ $final_path/.pythonz/bin/pythonz install 3.7.5
 ynh_print_info --message="Installing Reel2Bits..."
 
 pushd $final_path/api
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate 3.7.5) ve3
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve3
 	ve3/bin/pip3 install wheel
 	ve3/bin/pip3 install --requirement requirements.txt
 	#ve3/bin/python3 setup.py install
