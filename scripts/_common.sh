@@ -11,7 +11,7 @@ build_dependencies="libffi-dev cmake make pkg-config git libboost-all-dev libgd-
 
 swap_needed=2048
 
-PYTHON_VERSION=3.8.3
+python_version=3.8.3
 
 #=================================================
 # PERSONAL HELPERS

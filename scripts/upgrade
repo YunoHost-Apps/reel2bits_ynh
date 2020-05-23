@@ -199,7 +199,7 @@ export PYTHONZ_ROOT="$final_path/.pythonz"
 python $final_path/.pythonz/pythonz_install.py
 
 # Install Python
-$final_path/.pythonz/bin/pythonz install $PYTHON_VERSION
+$final_path/.pythonz/bin/pythonz install $python_version
 
 #=================================================
 # INSTALL REEL2BITS
@@ -207,7 +207,7 @@ $final_path/.pythonz/bin/pythonz install $PYTHON_VERSION
 ynh_print_info --message="Installing Reel2Bits..."
 
 pushd $final_path/api
-	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $PYTHON_VERSION) ve3
+	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve3
 	ve3/bin/pip3 install wheel
 	ve3/bin/pip3 install --requirement requirements.txt
 	#ve3/bin/python3 setup.py install
