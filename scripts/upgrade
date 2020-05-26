@@ -209,6 +209,7 @@ ynh_print_info --message="Installing Reel2Bits..."
 pushd $final_path/api
 	virtualenv -p $($final_path/.pythonz/bin/pythonz locate $python_version) ve3
 	ve3/bin/pip3 install wheel
+	ve3/bin/pip3 install werkzeug==0.16.1
 	ve3/bin/pip3 install --requirement requirements.txt
 	#ve3/bin/python3 setup.py install
 	export APP_SETTINGS='config.prod_secret.Config'
