@@ -216,7 +216,7 @@ ynh_print_info --message="Installing Python..."
 # Get pythonz
 # curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
 # ./pythonz-install
-ynh_setup_source "$final_path/.pythonz" pythonz
+ynh_setup_source --dest_dir="$final_path/.pythonz" --source_id=pythonz
 export PYTHONZ_ROOT="$final_path/.pythonz"
 # Then install it
 python $final_path/.pythonz/pythonz_install.py
