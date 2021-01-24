@@ -13,7 +13,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
-ynh_print_info --message="Managing script failure..."
+ynh_script_progression --message="Managing script failure..."
 
 ynh_clean_setup () {
 	ynh_clean_check_starting
@@ -24,7 +24,7 @@ ynh_abort_if_errors
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
-ynh_print_info --message="Retrieving arguments from the manifest..."
+ynh_script_progression --message="Retrieving arguments from the manifest..."
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url="/"
@@ -43,7 +43,7 @@ datadir="/home/yunohost.app/${app}"
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_print_info --message="Validating installation parameters..."
+ynh_script_progression --message="Validating installation parameters..."
 
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
@@ -54,7 +54,7 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_print_info --message="Storing installation settings..."
+ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
@@ -70,7 +70,7 @@ ynh_app_setting_set --app=$app --key=datadir --value=$datadir
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_print_info --message="Configuring firewall..."
+ynh_script_progression --message="Configuring firewall..."
 
 # Find an available port
 port=$(ynh_find_port --port=8095)
@@ -79,21 +79,21 @@ ynh_app_setting_set --app=$app --key=port --value=$port
 #=================================================
 # ADD SWAP
 #=================================================
-ynh_print_info --message="Adding $swap_needed Mo to swap..."
+ynh_script_progression --message="Adding $swap_needed Mo to swap..."
 
 ynh_add_swap --size=$swap_needed
 
 #=================================================
 # INSTALL BUILD DEPENDENCIES
 #=================================================
-ynh_print_info --message="Installing build dependencies..."
+ynh_script_progression --message="Installing build dependencies..."
 
 ynh_install_app_dependencies $build_dependencies
 
 #=================================================
 # BUILD AUDIOWAVEFORM
 #=================================================
-ynh_print_info --message="Building audiowaveform..."
+ynh_script_progression --message="Building audiowaveform..."
 
 ynh_setup_source --dest_dir="$final_path/audiowaveform.d/audiowaveform" --source_id=audiowaveform
 ynh_setup_source --dest_dir="$final_path/audiowaveform.d/googletest" --source_id=googletest
@@ -113,7 +113,7 @@ ynh_secure_remove --file="$final_path/audiowaveform.d"
 #=================================================
 # REMOVE BUILD DEPENDENCIES
 #=================================================
-ynh_print_info --message="Removing build dependencies"
+ynh_script_progression --message="Removing build dependencies"
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
@@ -121,14 +121,14 @@ ynh_remove_app_dependencies
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_print_info --message="Installing dependencies..."
+ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_print_info --message="Creating a PostgreSQL database..."
+ynh_script_progression --message="Creating a PostgreSQL database..."
 
 db_name=$(ynh_sanitize_dbid --db_name=$app)
 db_user=$db_name
@@ -142,7 +142,7 @@ ynh_psql_execute_as_root --sql="CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";" -
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_print_info --message="Setting up source files..."
+ynh_script_progression --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -156,7 +156,7 @@ ynh_setup_source --dest_dir="$final_path/front/dist" --source_id=front
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring nginx web server..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config "datadir"
@@ -164,7 +164,7 @@ ynh_add_nginx_config "datadir"
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Configuring system user..."
+ynh_script_progression --message="Configuring system user..."
 
 # Create a system user
 ynh_system_user_create --username=$app --home_dir="$final_path"
@@ -174,7 +174,7 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # CREATE THE DATA DIRECTORY
 #=================================================
-ynh_print_info --message="Create the data directory..."
+ynh_script_progression --message="Create the data directory..."
 
 # Create app folders
 mkdir -p "$datadir"
@@ -190,7 +190,7 @@ chown -R "$app": "$datadir"
 #=================================================
 # MODIFY A CONFIG FILE
 #=================================================
-ynh_print_info --message="Modifying a config file..."
+ynh_script_progression --message="Modifying a config file..."
 
 api_config="$final_path/api/config/prod_secret.py"
 cp ../conf/prod_secret.py "$api_config"
@@ -211,7 +211,7 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 #=================================================
 # INSTALL PYTHONZ TO GET PYTHON
 #=================================================
-ynh_print_info --message="Installing Python..."
+ynh_script_progression --message="Installing Python..."
 
 # Get pythonz
 # curl -kL https://raw.githubusercontent.com/saghul/pythonz/master/pythonz-install
@@ -227,7 +227,7 @@ $final_path/.pythonz/bin/pythonz install $python_version
 #=================================================
 # INSTALL REEL2BITS
 #=================================================
-ynh_print_info --message="Installing Reel2Bits..."
+ynh_script_progression --message="Installing Reel2Bits..."
 
 # Set permissions to app files
 chown -R "$app": "$final_path"
@@ -250,7 +250,7 @@ popd
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_print_info --message="Configuring a systemd service..."
+ynh_script_progression --message="Configuring a systemd service..."
 
 ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="../conf/reel2bits-web.service"
 
@@ -262,7 +262,7 @@ ynh_add_systemd_config --service="$app-worker" --template="reel2bits-worker.serv
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
-ynh_print_info --message="Storing the config file checksum..."
+ynh_script_progression --message="Storing the config file checksum..."
 
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum --file="$api_config"
@@ -273,7 +273,7 @@ ynh_store_file_checksum --file="$front_config"
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_print_info --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R "$app": "$final_path"
@@ -281,16 +281,16 @@ chown -R "$app": "$final_path"
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_print_info --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app-web --description "$app-web daemon for Reel2Bits"
-yunohost service add $app-worker --description "$app-worker daemon for Reel2Bits"
-yunohost service add $app --description "$app daemon for Reel2Bits"
+yunohost service add $app-web --description="$app-web daemon for Reel2Bits"
+yunohost service add $app-worker --description="$app-worker daemon for Reel2Bits"
+yunohost service add $app --description="$app daemon for Reel2Bits"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
 ynh_systemd_action --service_name=${app}-web --action="start" --log_path=systemd --line_match="Started ${app}-web"
@@ -300,7 +300,7 @@ systemctl start $app.target
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_print_info --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring SSOwat..."
 
 # Make app public if necessary
 if [ $is_public -eq 1 ]
@@ -312,7 +312,7 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -320,4 +320,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Installation of $app completed"
+ynh_script_progression --message="Installation of $app completed"

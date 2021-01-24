@@ -242,6 +242,15 @@ ynh_print_info --message="Securing files and directories..."
 chown -R "$app": "$final_path"
 
 #=================================================
+# INTEGRATE SERVICE IN YUNOHOST
+#=================================================
+ynh_print_info --message="Integrating service in YunoHost..."
+
+yunohost service add $app-web --description="$app-web daemon for Reel2Bits"
+yunohost service add $app-worker --description="$app-worker daemon for Reel2Bits"
+yunohost service add $app --description="$app daemon for Reel2Bits"
+
+#=================================================
 # SETUP SSOWAT
 #=================================================
 ynh_print_info --message="Upgrading SSOwat configuration..."
