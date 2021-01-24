@@ -1,7 +1,7 @@
 # Reel2Bits for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/reel2bits.svg)](https://dash.yunohost.org/appci/app/reel2bits)  
-[![Install Reel2Bits with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=reel2bits)
+[![Integration level](https://dash.yunohost.org/integration/reel2bits.svg)](https://dash.yunohost.org/appci/app/reel2bits) ![](https://ci-apps.yunohost.org/ci/badges/reel2bits.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/reel2bits.maintain.svg)  
+[![Install Reel2Bits with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=reel2bits)
 
 > *This package allow you to install Reel2Bits quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
@@ -41,8 +41,7 @@ Soundcloud-like but simple, easy and KISS (and ActivityPub).
 
 ---
 
-Developers info
-----------------
+## Developers info
 
 Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/reel2bits_ynh/tree/testing).
 
