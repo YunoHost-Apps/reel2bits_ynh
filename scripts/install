@@ -70,7 +70,7 @@ ynh_app_setting_set --app=$app --key=datadir --value=$datadir
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Configuring firewall..."
+ynh_script_progression --message="Finding an available port..."
 
 # Find an available port
 port=$(ynh_find_port --port=8095)
@@ -276,7 +276,7 @@ ynh_store_file_checksum --file="$front_config"
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chown -R "$app": "$final_path"
+chown -R $app: "$final_path"
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
@@ -300,13 +300,12 @@ systemctl start $app.target
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring permissions..."
 
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
-	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+	ynh_permission_update --permission="main" --add="visitors"
 fi
 
 #=================================================
