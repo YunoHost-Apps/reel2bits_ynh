@@ -10,6 +10,9 @@
     "url": "https://sound.otter.sh/user/dashie",
     "license": "AGPL-3.0-or-later",
     "maintainer": {
+        "name": ""
+    },
+    "previous_maintainer": {
         "name": "yalh76"
     },
     "requirements": {
