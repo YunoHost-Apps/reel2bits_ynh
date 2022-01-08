@@ -13,11 +13,7 @@
         "name": "yalh76"
     },
     "requirements": {
-<<<<<<< Updated upstream
-        "yunohost": ">= 4.1.6"
-=======
         "yunohost": ">= 4.3.0"
->>>>>>> Stashed changes
     },
     "multi_instance": true,
     "services": [
