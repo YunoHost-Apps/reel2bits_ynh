@@ -3,8 +3,4 @@ SOURCE_SUM=0b3eb0a0466fd81b713fab98a2103a07be1786cf02a1468433b125b59d18b712
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
-<<<<<<< Updated upstream
-SOURCE_FILENAME=
-=======
 SOURCE_FILENAME=reel2bits.tar.gz
->>>>>>> Stashed changes
