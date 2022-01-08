@@ -123,7 +123,7 @@ ynh_remove_app_dependencies
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
-ynh_install_app_dependencies $pkg_dependencies
+ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
@@ -159,7 +159,7 @@ ynh_setup_source --dest_dir="$final_path/front/dist" --source_id=front
 ynh_script_progression --message="Configuring nginx web server..."
 
 # Create a dedicated nginx config
-ynh_add_nginx_config "datadir"
+ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
@@ -305,6 +305,11 @@ ynh_script_progression --message="Configuring permissions..."
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
+<<<<<<< Updated upstream
+=======
+	# Everyone can access the app.
+	# The "main" permission is automatically created before the install script.
+>>>>>>> Stashed changes
 	ynh_permission_update --permission="main" --add="visitors"
 fi
 

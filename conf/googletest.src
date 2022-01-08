@@ -1,5 +1,5 @@
-SOURCE_URL=https://github.com/google/googletest/archive/011959aafddcd30611003de96cfd8d7a7685c700.tar.gz
-SOURCE_SUM=0e34ac9e3aac3af3977a7ca45c27bb941fbf3a803877a7e440f93a6f9dc9235f
+SOURCE_URL=https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+SOURCE_SUM=b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true

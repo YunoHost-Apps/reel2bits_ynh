@@ -1,9 +1,9 @@
 ;; Test complet
 	; Manifest
-		domain="domain.tld"	(DOMAIN)
-		admin="john"	(USER)
+		domain="domain.tld"
+		admin="john"
 		language="fr"
-		is_public=1	(PUBLIC|public=1|private=0)
+		is_public=1
 		password="pass"
 	; Checks
 		pkg_linter=1
@@ -17,7 +17,10 @@
 		upgrade=1	from_commit=0fc25106736e824bd984b26f0c2146a6685904e0
 		backup_restore=1
 		multi_instance=1
+<<<<<<< Updated upstream
 		port_already_use=0
+=======
+>>>>>>> Stashed changes
 		change_url=0
 ;;; Options
 Email=yalh@yahoo.com

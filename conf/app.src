@@ -1,6 +1,10 @@
-SOURCE_URL=https://github.com/rhaamo/reel2bits/archive/680765b772ef394e225aa1cada315adef425e0cd.tar.gz
-SOURCE_SUM=5052c5ca938ee7f24b838947532e5a9d6a09f17a3a0d81c1c0ea5e0a3c1ed2c9
+SOURCE_URL=https://github.com/rhaamo/reel2bits/archive/007ab4f7d1c77d426e1b1b8b51ea57eac6501e13.tar.gz
+SOURCE_SUM=0b3eb0a0466fd81b713fab98a2103a07be1786cf02a1468433b125b59d18b712
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
+<<<<<<< Updated upstream
 SOURCE_FILENAME=
+=======
+SOURCE_FILENAME=reel2bits.tar.gz
+>>>>>>> Stashed changes

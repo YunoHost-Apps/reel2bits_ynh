@@ -3,8 +3,8 @@
     "id": "reel2bits",
     "packaging_format": 1,
     "description": {
-        "en": "Soundcloud-like but simple, easy and KISS (and ActivityPub).",
-        "fr": "Soundcloud-like mais simple, facile et KISS (et ActivityPub)."
+        "en": "Soundcloud-like but simple, easy and KISS (and ActivityPub)",
+        "fr": "Soundcloud-like mais simple, facile et KISS (et ActivityPub)"
     },
     "version": "0.0.1-2020-02-04~ynh2",
     "url": "https://sound.otter.sh/user/dashie",
@@ -13,33 +13,27 @@
         "name": "yalh76"
     },
     "requirements": {
+<<<<<<< Updated upstream
         "yunohost": ">= 4.1.6"
+=======
+        "yunohost": ">= 4.3.0"
+>>>>>>> Stashed changes
     },
     "multi_instance": true,
     "services": [
         "nginx",
-        "php7.0-fpm",
+        "php7.3-fpm",
         "mysql"
     ],
     "arguments": {
         "install" : [
             {
                 "name": "domain",
-                "type": "domain",
-                "ask": {
-                    "en": "Choose a domain name for Reel2Bits",
-                    "fr": "Choisissez un nom de domaine pour Reel2Bits"
-                },
-                "example": "example.com"
+                "type": "domain"
             },
             {
                 "name": "admin",
-                "type": "user",
-                "ask": {
-                    "en": "Choose an admin user",
-                    "fr": "Choisissez l’administrateur"
-                },
-                "example": "johndoe"
+                "type": "user"
             },
             {
                 "name": "is_public",
@@ -62,12 +56,7 @@
             },
             {
                 "name": "password",
-                "type": "password",
-                "ask": {
-                    "en": "Set the administrator password",
-                    "fr": "Définissez le mot de passe administrateur"
-                },
-                "example": "Choose a password"
+                "type": "password"
             }
         ]
     }
