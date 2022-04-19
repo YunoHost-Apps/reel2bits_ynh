@@ -155,7 +155,7 @@ ynh_setup_source --dest_dir="$final_path/front/dist" --source_id=front
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring NGINX web server..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -191,21 +191,8 @@ chown -R "$app": "$datadir"
 #=================================================
 ynh_script_progression --message="Modifying a config file..."
 
-api_config="$final_path/api/config/prod_secret.py"
-cp ../conf/prod_secret.py "$api_config"
-ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --target_file="$api_config"
-ynh_replace_string --match_string="__DATADIR__" --replace_string="$datadir" --target_file="$api_config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$api_config"
-ynh_replace_string --match_string="__SECURITY_PASSWORD_SALT__" --replace_string="$security_password_salt" --target_file="$api_config"
-ynh_replace_string --match_string="__SECRET_KEY__" --replace_string="$secret_key" --target_file="$api_config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$api_config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$api_config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$api_config"
-ynh_replace_string --match_string="__FINAL_PATH__" --replace_string="$final_path" --target_file="$api_config"
-
-front_config="$final_path/front/config/local.json"
-cp ../conf/local.example.json "$front_config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$front_config"
+ynh_add_config --template="../conf/prod_secret.py" --destination="$final_path/api/config/prod_secret.py"
+ynh_add_config --template="../conf/local.example.json" --destination="$final_path/front/config/local.json"
 
 #=================================================
 # INSTALL PYTHONZ TO GET PYTHON
@@ -259,15 +246,6 @@ ynh_add_systemd_config --service="$app-web" --template="reel2bits-web.service"
 ynh_add_systemd_config --service="$app-worker" --template="reel2bits-worker.service"
 
 #=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-ynh_script_progression --message="Storing the config file checksum..."
-
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$api_config"
-ynh_store_file_checksum --file="$front_config"
-
-#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
@@ -310,7 +288,7 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
